@@ -1,0 +1,26 @@
+---
+- hosts: all
+  user: $user
+  vars:
+    user: app
+    bootstrap: false
+    app_environment: production
+    ruby_version: 2.0.0-p247
+    postgresql_state: absent
+    postgresql_socket: local
+    postgresql_user: app
+    postgresql_password: app
+    postgresql_db: app_production
+    backup_state: absent
+    colon: ':'
+  
+  tasks:
+  - include: roles/base.yml
+  - include: roles/ruby.yml
+  - include: roles/duply.yml
+  - include: roles/http.yml reverse_proxy=true
+  - include: roles/postgresql.yml
+  - include: roles/app.yml
+
+  handlers:
+  - include: common/handlers.yml

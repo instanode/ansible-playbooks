@@ -1,0 +1,8 @@
+- name: PHP | Install PHP
+  sudo: yes
+  action: apt pkg=$item
+  with_items:
+    - php5-fpm
+    - php5-mysql
+    - php5-gd
+    - php5-curl

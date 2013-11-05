@@ -1,0 +1,9 @@
+SOURCE=/home/${user}
+REMOTE=${backup_remote}
+TARGET=$REMOTE/`hostname`
+GPG_PW=${shared_token}
+MAX_AGE=1M
+MAX_FULL_BACKUPS=1
+MAX_FULLBKP_AGE=1M
+DUPL_PARAMS="$DUPL_PARAMS --exclude-if-present .duplicity-ignore"
+DUPL_PARAMS="$DUPL_PARAMS --s3-use-new-style --s3-european-buckets"

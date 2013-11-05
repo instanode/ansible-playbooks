@@ -1,0 +1,16 @@
+---
+- hosts: all
+  user: $user
+  vars:
+    user: app
+    bootstrap: false
+  
+  tasks:
+  - include: roles/base.yml
+  - include: roles/duply.yml
+  - include: roles/http.yml php=true
+  - include: roles/mysql.yml
+  - include: roles/php.yml
+
+  handlers:
+  - include: common/handlers.yml

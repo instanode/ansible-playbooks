@@ -1,0 +1,21 @@
+#!/bin/sh
+
+DEST=/home/${user}/hotcopy
+
+echo
+
+if [ ! -d $DEST ]; then
+  mkdir $DEST
+  chown ${user} $DEST
+fi
+
+# PostgreSQL
+PG_DUMPALL=/usr/bin/pg_dumpall
+if [ -e $PG_DUMPALL ]; then
+  echo "Dumping PostgreSQL"
+  sudo -u postgres $PG_DUMPALL > $DEST/pg_dumpall.sql
+fi
+
+echo
+echo "STATISTICS"
+tree -h --noreport $DEST

@@ -1,0 +1,17 @@
+- name: General | Install base packages
+  sudo: yes
+  action: apt pkg=$item update-cache=yes
+  with_items:
+  - supervisor
+  - rsync
+  - curl
+  - sqlite3
+  - git
+  - vim
+
+- name: General | Install ansible dependencies
+  sudo: yes
+  action: apt pkg=$item
+  with_items:
+  - libpq-dev
+  - python-psycopg2

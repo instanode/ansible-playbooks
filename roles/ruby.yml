@@ -1,0 +1,85 @@
+- name: Ruby | Install system ruby
+  sudo: yes
+  action: apt pkg=ruby1.9.1-full
+
+- name: Ruby | Install system gems
+  sudo: yes
+  action: gem name=$item
+  with_items:
+  - bundler
+
+- name: Ruby | Install build essentials
+  sudo: yes
+  action: apt pkg=$item
+  with_items:
+    - build-essential
+    - libsqlite3-dev
+    - libv8-dev
+    - libssl-dev
+
+- name: Ruby | Check ruby version
+  raw: source ~/.profile &&
+       rbenv versions | grep ${ruby_version}
+  register: ruby_version_present
+  ignore_errors: yes
+
+- name: Ruby | Prepare rbenv directory
+  when: ruby_version_present|failed
+  sudo: yes
+  file: path=/usr/local/rbenv
+        state=directory
+        owner=$user
+
+- name: Ruby | Clone rbenv
+  when: ruby_version_present|failed
+  git: repo=git://github.com/sstephenson/rbenv.git
+       dest=/usr/local/rbenv
+       version=v0.4.0
+
+- name: Ruby | Add rbenv to path
+  when: ruby_version_present|failed
+  lineinfile: dest=~/.profile
+              line='export PATH="/usr/local/rbenv/bin${colon}$PATH"'
+              regexp='^export PATH=.*local\/rbenv\/bin'
+              create=yes
+
+- name: Ruby | Set rbenv directory
+  when: ruby_version_present|failed
+  lineinfile: dest=~/.profile
+              line='export RBENV_ROOT="/usr/local/rbenv"'
+              regexp='^export RBENV_ROOT'
+
+- name: Ruby | Init rbenv
+  when: ruby_version_present|failed
+  lineinfile: dest=~/.profile
+              line='eval "$(rbenv init -)"'
+              regexp='^eval .*rbenv'
+
+- name: Ruby | Install ruby-build plugin
+  when: ruby_version_present|failed
+  git: repo=https://github.com/sstephenson/ruby-build.git
+       dest=/usr/local/rbenv/plugins/ruby-build
+
+- name: Ruby | Load pre-built ruby
+  when: ruby_version_present|failed
+  get_url: url=https://dl.dropboxusercontent.com/u/9790235/rubies/${ruby_version}.tar.gz
+           dest=/tmp/${ruby_version}.tar.gz
+
+- name: Ruby | Prepare rbenv/versions directory
+  when: ruby_version_present|failed
+  sudo: yes
+  file: path=/usr/local/rbenv/versions
+        state=directory
+        owner=$user
+
+- name: Ruby | Extract ruby tarball
+  when: ruby_version_present|failed
+  shell: tar xvfz /tmp/${ruby_version}.tar.gz
+         chdir=/usr/local/rbenv/versions/
+
+- name: Ruby | Set ruby default
+  shell: RBENV_ROOT="/usr/local/rbenv" /usr/local/rbenv/bin/rbenv global ${ruby_version}
+
+- name: Ruby | Install bundler
+  when: ruby_version_present|failed
+  shell: RBENV_ROOT="/usr/local/rbenv" /usr/local/rbenv/bin/rbenv exec gem install bundler

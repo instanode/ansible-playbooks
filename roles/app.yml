@@ -1,0 +1,26 @@
+- name: App | Prepare supervisor directory structure
+  file: path=/home/${user}/app/shared/log
+        state=directory
+        owner=$user
+
+- name: App | Prepare supervisor directory structure (app.log)
+  command: touch /home/${user}/app/shared/log/app.log
+           creates=/home/${user}/app/shared/log/app.log
+
+- name: App | Prepare supervisor directory structure (app.error.log)
+  command: touch /home/${user}/app/shared/log/app.error.log
+           creates=/home/${user}/app/shared/log/app.error.log
+
+- name: App | Configure supervisord
+  sudo: yes
+  when: bootstrap
+  template: src=common/supervisor/app.conf.j2
+            dest=/etc/supervisor/conf.d/app.conf
+            backup=yes
+  notify:
+    - Supervisor | Restart supervisord
+    - App | Restart app
+
+- name: App | Start supervisord
+  sudo: yes
+  service: name=supervisor state=started

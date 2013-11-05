@@ -1,0 +1,7 @@
+[program:app]
+command=/usr/local/rbenv/bin/rbenv exec bundle exec puma -b tcp://[::]:3000 -e ${app_environment}
+stderr_logfile=/home/${user}/app/shared/log/app.log
+redirect_stderr=true
+user=${user}
+directory=/home/${user}/app/current
+environment=USER="${user}",HOME="/home/${user}",PATH="/usr/local/rbenv/shims:/usr/local/rbenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games",RBENV_ROOT="/usr/local/rbenv",RAILS_ENV="${app_environment}"

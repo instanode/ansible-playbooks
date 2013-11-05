@@ -1,0 +1,38 @@
+- name: Duply | Install duply
+  sudo: yes
+  action: apt pkg=$item
+  with_items:
+    - tree
+    - duply
+    - python-paramiko
+    - python-boto
+
+- name: Duply | Setup duply directory
+  when: backup_state == "present"
+  file: path=/home/$user/.duply/engine
+        state=directory
+        owner=$user
+
+- name: Duply | Provide duply configuration
+  when: backup_state == "present"
+  template: src=common/duply/conf.j2
+            dest=/home/$user/.duply/engine/conf
+            owner=$user
+            backup=yes
+
+- name: Duply | Provide duply pre script
+  when: backup_state == "present"
+  template: src=common/duply/pre.j2
+            dest=/home/$user/.duply/engine/pre
+            owner=$user
+            backup=yes
+
+- name: Duply | Setup cron job
+  sudo: yes
+  cron: name="duply"
+        special_time=daily
+        job="/usr/bin/duply engine backup > /dev/null"
+        user=$user
+        cron_file=backup-engine
+        state=$backup_state
+  notify: Duply | Run duply

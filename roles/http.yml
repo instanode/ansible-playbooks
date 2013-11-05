@@ -1,0 +1,11 @@
+- name: Http | Install nginx
+  sudo: yes
+  action: apt pkg=nginx-full
+
+- name: Http | Configure nginx
+  sudo: yes
+  when: bootstrap
+  template: src=common/nginx/default.j2
+            dest=/etc/nginx/nginx.conf
+            backup=yes
+  notify: Http | Restart nginx
