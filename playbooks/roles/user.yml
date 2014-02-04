@@ -1,0 +1,3 @@
+- name: General | Add user
+  sudo: yes
+  action: user name=$user createhome=yes

@@ -1,0 +1,31 @@
+FROM ubuntu:precise
+MAINTAINER contact@instanode.de
+
+RUN ln -sf /bin/true /usr/bin/ischroot
+RUN apt-get update && apt-get upgrade -y && apt-get clean
+
+RUN apt-get install -y openssh-server
+RUN mkdir /root/.ssh
+RUN chmod 700 /root/.ssh
+ADD files/id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 600 /root/.ssh/authorized_keys
+RUN chown root:root /root/.ssh/authorized_keys
+
+RUN apt-get install -y supervisor
+RUN mkdir -p /var/run/sshd
+RUN mkdir -p /var/log/supervisor
+ADD files/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+RUN apt-get install -y python-apt python-jinja2 python-paramiko python-pip python-yaml
+RUN pip install ansible
+RUN mkdir -p /etc/ansible
+RUN ( echo '[nodes]' && \
+      echo 'localhost' \
+    ) > /etc/ansible/hosts
+ADD playbooks /root/playbooks
+RUN ansible-playbook /root/playbooks/static.yml --connection=local -e 'bootstrap=true'
+
+RUN apt-get clean
+
+EXPOSE 22
+CMD ["/usr/bin/supervisord"]

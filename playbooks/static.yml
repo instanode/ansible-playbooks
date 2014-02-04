@@ -2,10 +2,13 @@
 - hosts: all
   user: $user
   vars:
-    user: app
+    user: deploy
     bootstrap: false
+    backup_state: absent
+    php: false
   
   tasks:
+  - include: roles/user.yml
   - include: roles/base.yml
   - include: roles/duply.yml
   - include: roles/http.yml
